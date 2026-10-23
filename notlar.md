@@ -185,3 +185,35 @@ docker run hello-world    → test kutusunu indirip çalıştırır
 ```
 
 `hello-world` çıktısını görmek Docker'ın çalıştığını kanıtladı. Kurulumda Docker Desktop açık olmalı, yoksa komutlar hata verir.
+
+---
+
+## Gün 8: Gizli bilgiler (.env)
+
+**.env dosyası:** Şifre gibi gizli bilgileri tutar. Her satır `ANAHTAR=değer` biçiminde, boşluk ve tırnak yok. Kod ve `docker-compose.yml` bu değerleri `.env`'den okur, böylece şifre dosyaların içine yazılmaz.
+
+**.gitignore'a `.env` eklemek:** Git'e "bu dosyayı GitHub'a gönderme" demek. GitHub'da `.env`'nin görünmemesi hata değil, doğru çalıştığının kanıtı. Kontrol: `.env` bilgisayarımda var ama `git status` temiz diyorsa git onu yok sayıyor.
+
+**Commit ile push farkı (tekrar):** `git status` içindeki "ahead of origin/main by 1 commit" uyarısı, commit'in yerelde olduğunu ama GitHub'a gönderilmediğini söyler. Çözüm `git push`.
+
+---
+
+**Image ve container:** Image (imaj), hazır paketlenmiş kalıp, bir sınıf (class) gibi. Container (konteyner), o imajdan başlatılmış çalışan kutu, bir nesne gibi. `postgres:17` PostgreSQL'in 17 sürümünün imajı. Bir kez indirilir, ondan istediğim kadar kutu başlatılabilir.
+
+**Docker Compose:** Kutuların tarifini tek bir dosyada (`docker-compose.yml`) yazıp tek komutla ayağa kaldırmak.
+
+**docker-compose.yml satırları:**
+- `image`: hangi imajdan üretileceği
+- `environment`: kutuya verilen ayarlar. `${...}` yazmak değeri `.env`'den okur, şifre dosyaya yazılmaz
+- `ports: "5432:5432"`: soldaki bilgisayarımın kapısı, sağdaki kutunun içindeki kapı. Uygulamam `localhost:5432` ile kutudaki PostgreSQL'e ulaşır
+- `volumes`: veri kutunun dışında saklanır. Yazmazsam kutuyu silince veritabanı da silinir
+
+**YAML'da girinti anlam taşır, tab kullanılmaz.**
+
+**Komutlar:**
+```
+docker compose up -d     → kutuyu arka planda başlat
+docker ps                → çalışan kutuları listele (STATUS: Up olmalı)
+docker compose down      → kutuyu durdur (veri volume'da kalır)
+```
+`docker compose down -v` yazmamalıyım, `-v` volume'u yani bütün veritabanını siler.
