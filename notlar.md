@@ -173,10 +173,15 @@ await Task.Delay(2000);   // 2 saniyelik sahte yavaş iş
 
 ---
 
-## Aşama 0 kontrol listesi
+---
 
-- [ ] Konsolda oyun listesi yöneten programı yazdım ve her satırını anlatabilirim
-- [ ] Enum, sınıf, liste, LINQ (`Where`, `OrderByDescending`, `Average`) ne işe yarıyor biliyorum
-- [ ] Null ve `??` mantığını anlıyorum
-- [ ] async/await'in neden var olduğunu açıklayabilirim
-- [ ] Her gün commit attım
+## Gün 7: Docker
+
+**Docker:** Bir programı kendi izole kutusunda (konteyner) çalıştırır. Kurulum ve ayarlar kutunun içinde kalır, bilgisayarımı kirletmez, kutuyu silip sıfırdan başlayabilirim. Aynı kutu başka bir bilgisayarda da aynen çalışır, bu yüzden ilanlarda sık geçiyor. Python'daki `venv` fikrinin çok daha kapsamlısı: sadece paketleri değil, programın bütün ortamını izole eder.
+
+```
+docker --version          → Docker kurulu mu
+docker run hello-world    → test kutusunu indirip çalıştırır
+```
+
+`hello-world` çıktısını görmek Docker'ın çalıştığını kanıtladı. Kurulumda Docker Desktop açık olmalı, yoksa komutlar hata verir.
