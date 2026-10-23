@@ -3,9 +3,9 @@
 
 games.Add(new Game { Name = "Gece Yolcusu", Status = Status.Playing });
 
-games.Add(new Game { Name = "Batman", Status = Status.Planned, Rating = 7.6 });
+games.Add(new Game { Name = "Batman", Status = Status.Planned, Rating = 5.5 });
 
-games.Add(new Game { Name = "Last of Us", Status = Status.Dropped, Rating = 2 });
+games.Add(new Game { Name = "Last of Us", Status = Status.Dropped, Rating = 10 });
 
 
 
@@ -22,6 +22,8 @@ while (true)
     Console.WriteLine("4) Puana göre sırala");
 
     Console.WriteLine("5) Ortalama puan");
+
+    Console.WriteLine("6) RAWG simülasyonu");
 
     Console.WriteLine("0) Çıkış");
 
@@ -77,8 +79,24 @@ while (true)
     else if (secim == "5")
     {
         var avg = games.Average(g => g.Rating);
-        Console.Write("Ortalama puan: ");
-        Console.WriteLine(avg);
+        double sonuc = avg ?? 0;
+        if (sonuc == 0)
+        {
+            Console.WriteLine("Henüz bir oyun puanlanmamıştır.");
+
+        }
+        else
+        {
+            Console.Write("Ortalama puan: ");
+            Console.WriteLine(sonuc);
+        }
+    }
+
+    else if (secim == "6")
+    {
+        Console.WriteLine("RAWG'a soruluyor...");
+        await Task.Delay(2000);
+        Console.WriteLine("Cevap geldi.");
     }
 
     else if (secim == "0")
