@@ -1,3 +1,182 @@
-## Gün 1
-.NET SDK kuruldu, repo açıldı, konsol projesi oluşturuldu, Hello World çalıştı.
+# Loadout – Öğrenme Notlarım
 
+Bu dosya, Loadout projesi boyunca öğrendiklerimin kaydı. Aşama 0: C# ısınması (konsol projesi).
+
+---
+
+## Gün 1: Kurulum ve çalışma düzeni
+
+**.NET SDK:** C# geliştirme kiti. İçinde derleyici, çalışma ortamı (runtime), `dotnet` komutu ve proje şablonları var. SDK, runtime'ı da kapsar. Sunucuya genelde sadece runtime kurulur, geliştirici makinesine SDK.
+
+**C# derlenir:** Python kodu çalışırken yorumlanır, C# kodu önce derlenir sonra çalışır. Yazım ve tip hatalarını derleyici program başlamadan yakalar. Mantık hatalarını (yanlış formül gibi) yakalamaz.
+
+**Git ve GitHub farkı:** Git, bilgisayarımdaki sürüm kontrol aracı. GitHub, git depolarını internette tutan servis.
+
+**Git'in üç adımı:**
+```
+git add .      → değişiklikleri sepete koy (bilgisayarımda)
+git commit -m  → sepetin kaydını al, mesaj yaz (bilgisayarımda)
+git push       → kayıtları GitHub'a gönder (internete)
+```
+`commit` GitHub'a göndermez, sadece yerel geçmişe kayıt ekler. Göndermek için `push` lazım.
+
+**Kullandığım komutlar:**
+- `git clone <adres>`: repoyu bilgisayara indirir
+- `cd klasör` / `cd ..`: klasöre gir / bir üste çık. Komutlar bulunduğum klasöre göre çalışır.
+- `dotnet new gitignore`: .NET için hazır `.gitignore` üretir
+- `dotnet new console -n LoadoutKonsol`: konsol projesi açar
+- `dotnet run`: derler ve çalıştırır
+- `git push -u origin HEAD`: ilk gönderimde dalı bağlar, sonra düz `git push` yeter
+
+**.gitignore:** GitHub'a gitmeyecek dosyaların listesi. `bin/` ve `obj/` derleme çıktısı, kodum değil, her bilgisayarda yeniden oluşuyor. Kural: GitHub'a sadece benim yazdıklarım gider, üretilenler gitmez.
+
+**Proje yapısı:** `loadout/` klasörü bütün projenin çatısı. Her .NET projesi kendi klasöründe ve kendi `.csproj` dosyasıyla durur. İleride `backend/`, `frontend/` gibi klasörler aynı repoda olacak.
+
+**Program.cs ve .csproj:** `Program.cs` programın giriş noktası. `.csproj` projenin ayar dosyası (hangi .NET sürümü, hangi paketler).
+
+---
+
+## Gün 2: Enum, sınıf, liste
+
+**Enum:** Önceden belirlenmiş sabit seçenekler listesi. Metin yerine kullanılır, çünkü metinde `"Bitirdim"` ile `"bitirdim"` farklı sayılır ve hata fark edilmez. Enum'da listede olmayan değer yazarsam derleyici hemen itiraz eder. Formdaki açılır liste (`<select>`) mantığının kod içindeki hali.
+
+```csharp
+enum Status { Planned, Playing, Completed, Dropped }
+Status durum = Status.Playing;
+```
+
+Arkada her değer sırayla bir sayıdır (Planned = 0, Playing = 1...). Veritabanına kaydederken önemli olacak.
+
+**C#'ta tip önce yazılır:** `Status durum = ...`. Yanlış tipte değer atarsam derleyici izin vermez.
+
+**Sınıf (class):** Bir şeyin kalıbı. Kalıptan istediğim kadar nesne üretirim.
+
+```csharp
+class Game
+{
+    public string Name { get; set; } = "";
+    public Status Status { get; set; }
+}
+```
+
+- `public`: dışarıdan erişilebilir
+- `{ get; set; }`: değeri okuyabilirim ve değiştirebilirim
+- `= ""`: başlangıç değeri, null uyarısını önler
+- `Status Status`: özelliğin adı ve tipi aynı olabilir, normal
+
+**Liste:** `List<Game>` sadece Game tutabilen liste. Python'daki `[]` gibi.
+
+```csharp
+List<Game> games = new List<Game>();
+games.Add(new Game { Name = "Gece Yolcusu", Status = Status.Playing });
+foreach (Game game in games) { ... }
+```
+
+- `.Add(...)` = Python'daki `.append(...)`
+- `new Game { Name = ..., Status = ... }`: nesneyi oluşturup özelliklerini tek seferde doldurur
+- `foreach (Game g in games)` = Python'daki `for g in games`
+
+---
+
+## Gün 3: Konsol menüsü
+
+**Menü döngüsü:** `while (true)` ile program ben "çıkış" diyene kadar açık kalır. `break` döngüden çıkarır.
+
+**ReadLine:** `Console.ReadLine()` = Python'daki `input()`. `Console.Write` satır sonuna geçmez, `WriteLine` geçer.
+
+**`string?`:** ReadLine bazen "hiçbir şey" (null) dönebilir, bu yüzden tip `string?`.
+
+**if / else if / else:** Python'daki `if / elif / else`. Koşul parantez içinde, gövde süslü parantez içinde.
+
+**String interpolation:** `$"{game.Name} - {game.Status}"` Python'daki f-string. Süslü parantez içindeki şey hesaplanıp yerine konur.
+
+**Yaptığım hatalar ve dersler:**
+1. `{"game.Name"}` yazdım, tırnak içindeki şey metin sayılır, ekrana harfi harfine `game.Name` çıktı. Doğrusu `{game.Name}`.
+2. Son `else`'e `break` koymuştum, yanlış seçimde program kapanıyordu. `0` için ayrı `else if` açıp `break`'i oraya taşıdım, `else`'te sadece mesaj yazdırdım.
+3. Oyun listesini döngünün dışında oluşturmalıyım, içinde olsaydı her turda sıfırlanırdı.
+
+---
+
+## Gün 4: LINQ ve Where
+
+**LINQ:** Listelerde filtreleme, sıralama, hesaplama için hazır metotlar.
+
+**Where:** Koşula uyanları seçer. Python'daki liste kapsamının (list comprehension) karşılığı.
+
+```csharp
+var oynananlar = games.Where(g => g.Status == Status.Playing);
+```
+
+- `g => ...` bir **lambda**: kısa, isimsiz fonksiyon. `g` her oyun için kullandığım geçici ad, istediğim adı verebilirim.
+- `var`: "tipi derleyici bulsun" demek.
+
+---
+
+## Gün 5: Puan, sıralama, ortalama
+
+**`double?`:** Ondalıklı sayı ve boş olabilir. Puanı henüz verilmemiş oyunun puanı 0 değil, "yoktur". Aksi halde "puanlanmamış" ile "0 puan" ayırt edilemez.
+
+```csharp
+public double? Rating { get; set; }
+```
+
+**OrderByDescending:** Büyükten küçüğe sıralar. Python'daki `sorted(..., reverse=True)`. Puanı boş olanlar en sona düşer.
+
+```csharp
+var sirali = games.OrderByDescending(g => g.Rating);
+```
+
+**Average:** Ortalamayı hesaplar, boş olanları atlar. Hiçbir oyun puanlanmamışsa sonuç da boştur (null).
+
+```csharp
+var ortalama = games.Average(g => g.Rating);
+```
+
+---
+
+## Gün 6: Null ve async/await
+
+**Null:** "Değer yok" demek. Boş olabilen bir değerle çalışırken boş durumunu ele almak gerekir.
+
+```csharp
+if (ortalama == null) { Console.WriteLine("Henüz puanlanmış oyun yok."); }
+```
+
+**`??` operatörü:** "Boşsa şunu kullan". `double sonuc = ortalama ?? 0;` Python'daki `x if x is not None else 0` gibi.
+
+**async/await:** İnternetten veri çekmek, veritabanına sormak gibi yavaş işler sırf beklemekten ibarettir. Normal kodda program bekleme boyunca durur. `await`, "bu işi başlat, cevap gelene kadar iş parçacığını başkasına bırak, cevap gelince devam et" der. Web API'de çok kullanıcılı çalışmak için şart. Python'daki `await asyncio.sleep()` gibi.
+
+```csharp
+await Task.Delay(2000);   // 2 saniyelik sahte yavaş iş
+```
+
+`Program.cs` içinde `await` doğrudan kullanılabilir. Başka bir metotta kullanmak için metoda `async` yazılır ve dönüş tipi `Task` olur (Web API'de görülecek).
+
+---
+
+## Python → C# eşleşmeleri
+
+| Python | C# |
+|---|---|
+| `print()` | `Console.WriteLine()` |
+| `input()` | `Console.ReadLine()` |
+| `f"{x}"` | `$"{x}"` |
+| `[]`, `.append()` | `List<T>`, `.Add()` |
+| `for x in liste:` | `foreach (T x in liste)` |
+| `elif` | `else if` |
+| `enum.Enum` | `enum` |
+| `None` | `null` |
+| `x if x else y` | `x ?? y` |
+| liste kapsamı `[g for g in ...]` | `.Where(g => ...)` |
+| `sorted(..., reverse=True)` | `.OrderByDescending(...)` |
+| `await asyncio.sleep()` | `await Task.Delay()` |
+
+---
+
+## Aşama 0 kontrol listesi
+
+- [ ] Konsolda oyun listesi yöneten programı yazdım ve her satırını anlatabilirim
+- [ ] Enum, sınıf, liste, LINQ (`Where`, `OrderByDescending`, `Average`) ne işe yarıyor biliyorum
+- [ ] Null ve `??` mantığını anlıyorum
+- [ ] async/await'in neden var olduğunu açıklayabilirim
+- [ ] Her gün commit attım
