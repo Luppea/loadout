@@ -1,0 +1,6 @@
+@LoadoutApi_HostAddress = http://localhost:5099
+
+GET {{LoadoutApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
