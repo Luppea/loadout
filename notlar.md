@@ -299,3 +299,22 @@ Ctrl+C                                                          → sunucuyu dur
 **Kod değişince API'yi yeniden başlatmam gerekir:** C# derlenir, değişiklik yeni derlemede görünür (`Ctrl+C`, sonra `dotnet run`).
 
 **Paket ekleme:** `dotnet add package Scalar.AspNetCore` (Python'daki `pip install`'ın karşılığı, paket `.csproj` dosyasına yazılır).
+
+---
+
+## Gün 12: Model sınıfları ve nesne döndürmek
+
+**Model:** Veriyi temsil eden sınıf (oyun, kullanıcı). `Models/` klasöründe tutulur, controller'lar sadece istekleri karşılar.
+
+**Namespace (`namespace LoadoutApi.Models;`):** Sınıfın hangi gruba ait olduğunu söyler. Başka bir namespace'teki sınıfı kullanmak için `using LoadoutApi.Models;` yazılır.
+
+**`public`:** Controller'ın döndürdüğü tip `public` olmak zorunda. Eksikse "Inconsistent accessibility" hatası gelir, çünkü `public` olmayan sınıf sadece kendi projesinde görünür.
+
+**`Id`:** Veritabanında her satırın kendine ait numarası. Oyunu bulmak, güncellemek ve silmek için gerekli, konsolda buna ihtiyaç yoktu.
+
+**Nesne döndürmek:** Metodun dönüş tipi `List<Game>` olunca ASP.NET her oyunu JSON nesnesine çevirir.
+
+**JSON'a çevirirken olanlar:**
+- Alan adları otomatik küçük harfle başlar (`Name` → `name`)
+- Boş olabilen değer `null` olur (`"rating": null`)
+- Enum varsayılan olarak **sayı** çıkar (`Playing` → `1`), çünkü arkada her enum değeri bir sayıdır. Bu, API'yi okuyan biri için anlamsız
