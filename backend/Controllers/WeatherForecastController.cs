@@ -10,10 +10,8 @@ public class GamesController : ControllerBase
     [HttpGet]
     public List<string> Get()
     {
-        return new List<string> { "Gece Yolcusu", "Kül Krallığı", "Taş Bahçe" };
+        return new List<string> { "Gece Yolcusu", "Kül Krallığı", "Taş Bahçe", "Son Fener" };
     }
-
-
 
 }
 public class WeatherForecastController : ControllerBase

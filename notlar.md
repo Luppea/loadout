@@ -217,3 +217,85 @@ docker ps                → çalışan kutuları listele (STATUS: Up olmalı)
 docker compose down      → kutuyu durdur (veri volume'da kalır)
 ```
 `docker compose down -v` yazmamalıyım, `-v` volume'u yani bütün veritabanını siler.
+
+---
+
+## Gün 9: DBeaver ile PostgreSQL'e bağlanmak
+
+**DBeaver:** Veritabanının içine gözle bakmamı sağlayan arayüz. Flask projelerindeki DB Browser'ın PostgreSQL karşılığı.
+
+**Bağlantı bilgileri nereden geliyor:**
+- Host `localhost`: kutu benim bilgisayarımda çalışıyor
+- Port `5432`: `docker-compose.yml` içindeki `ports` satırı
+- Database, Username, Password: `.env` dosyasındaki değerler
+
+**SQL komutları (PostgreSQL):**
+```sql
+CREATE TABLE deneme (id SERIAL PRIMARY KEY, ad TEXT);   -- tablo oluştur
+INSERT INTO deneme (ad) VALUES ('Gece Yolcusu');        -- satır ekle
+SELECT * FROM deneme;                                   -- tabloyu getir
+DROP TABLE deneme;                                      -- tabloyu sil
+```
+
+`SERIAL`, PostgreSQL'de kendiliğinden artan numara demek (SQLite'taki `AUTOINCREMENT`'in karşılığı). İleride bu tabloları elle yazmayacağım, EF Core benim yerime üretecek.
+
+**Çalıştırma:** komut satırında imleç varken `Ctrl+Enter`. Liste eskiyse sol panelde `F5` ile yenilenir.
+
+---
+
+## Gün 10: İlk Web API
+
+**Web API:** Flask'taki `@app.route` ile aynı fikir: adrese istek gelir, fonksiyon çalışır, cevap döner. Fark, cevabın HTML değil **JSON** olması. HTML'i ileride React çizecek, API sadece veri verecek.
+
+**Flask ve C# eşleşmesi:**
+
+| Flask | C# |
+|---|---|
+| `@app.route("/games")` | `[Route("[controller]")]` |
+| `methods=["GET"]` | `[HttpGet]` |
+| `def get():` | `public List<string> Get()` |
+| `return jsonify(...)` | `return ...` (JSON'a çevirmeyi ASP.NET yapar) |
+
+**Köşeli parantezler `[...]` (attribute):** Python'daki decorator'ların karşılığı. Altındaki şeye özellik ekler. `[HttpGet]` = "bu metot GET isteğine cevap verir", `[ApiController]` = "bu sınıf bir API controller'ı".
+
+**Controller:** İlgili uç noktaların toplandığı sınıf. `GamesController` içinde oyunla ilgili adresler olacak (listele, ekle, sil).
+
+**`[controller]` kısayolu:** Sınıfın adından "Controller" atılınca kalan kısım adres olur. `GamesController` → `/games`.
+
+**Komutlar:**
+```
+dotnet new webapi --use-controllers -n LoadoutApi -o backend   → API projesi aç
+dotnet run                                                      → sunucuyu başlat
+Ctrl+C                                                          → sunucuyu durdur
+```
+
+**Sunucu çalışırken terminal meşgul kalır:** `Now listening on: http://localhost:5099` yazısı sunucunun çalıştığını gösterir (Flask'taki `app.run()` gibi). Port numarası kendi ekranımdaki yazıdan alınır.
+
+**Swagger konusu:** .NET 9'dan beri Web API şablonunda Swagger arayüzü hazır gelmiyor, sadece OpenAPI belgesi (`/openapi/v1.json`) üretiliyor. Test arayüzü için Scalar kullanacağım.
+
+---
+
+## Gün 11: Scalar ve HTTP istek-cevap döngüsü
+
+**Scalar:** API'nin uç noktalarını bir arayüzde listeleyen, tıklayıp deneme yapmamı sağlayan araç. POST gibi adres çubuğundan deneyemeyeceğim istekleri test etmek için lazım.
+
+**OpenAPI ve Scalar farkı:**
+- `app.MapOpenApi()`: API'nin menüsünü (hangi adresler var) belge olarak yayınlar, `/openapi/v1.json`
+- `app.MapScalarApiReference()`: o belgeyi okuyup arayüz çizer, `/scalar/v1`
+
+**Bir isteğin yolculuğu (Send'e basınca):**
+1. Scalar API'ye HTTP isteği yollar (`GET /games`). Adres çubuğuna yazmakla aynı şey.
+2. İstek benim bilgisayarımda kalır (`localhost` = bu bilgisayar, `5099` = API'nin portu).
+3. ASP.NET yola ve metoda bakıp `[Route]` ve `[HttpGet]` ile doğru metodu bulur.
+4. Metot çalışır, liste döner.
+5. ASP.NET listeyi JSON'a çevirir.
+6. Cevap durum koduyla (200) ve JSON gövdesiyle döner.
+7. Scalar cevabı düzenli gösterir.
+
+**JSON:** Sadece metin. Python liste/sözlük yazımına benzer: çift tırnak, `true/false/null` küçük harf, sonda fazladan virgül yok. Tarayıcı ve React gibi programlar bu metni kendi veri yapılarına çevirir.
+
+**HTTP durum kodları:** 200 başarılı, 400 hatalı istek, 401 giriş yapılmamış, 404 bulunamadı, 500 sunucu hatası.
+
+**Kod değişince API'yi yeniden başlatmam gerekir:** C# derlenir, değişiklik yeni derlemede görünür (`Ctrl+C`, sonra `dotnet run`).
+
+**Paket ekleme:** `dotnet add package Scalar.AspNetCore` (Python'daki `pip install`'ın karşılığı, paket `.csproj` dosyasına yazılır).
