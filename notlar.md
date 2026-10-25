@@ -318,3 +318,31 @@ Ctrl+C                                                          → sunucuyu dur
 - Alan adları otomatik küçük harfle başlar (`Name` → `name`)
 - Boş olabilen değer `null` olur (`"rating": null`)
 - Enum varsayılan olarak **sayı** çıkar (`Playing` → `1`), çünkü arkada her enum değeri bir sayıdır. Bu, API'yi okuyan biri için anlamsız
+
+---
+
+## Gün 13: Enum'u JSON'da metin olarak göstermek
+
+**Sorun:** Enum varsayılan olarak JSON'a sayı olarak çıkar (`"status": 1`). Bunu okuyan biri enum sırasını bilmek zorunda kalır. Ayrıca enum'a ortadan yeni değer eklenirse sayılar kayar ve eski veriler karışır. `"status": "Playing"` hem okunaklı hem kararlı.
+
+**Serialization / Deserialization:**
+- Serialization: C# nesnesini JSON metnine çevirmek (GET cevabı)
+- Deserialization: JSON metnini C# nesnesine çevirmek (POST'ta gelen veri)
+
+**Ayar (`Program.cs`):**
+```csharp
+using System.Text.Json.Serialization;
+
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
+```
+- `AddJsonOptions`: JSON çevirisinin ayarlarını değiştirir
+- `options => { ... }`: lambda, `options` ASP.NET'in verdiği ayar nesnesi
+- `JsonStringEnumConverter`: enum'ları adıyla yazan/okuyan çevirmen
+
+**Bu ayar iki yönde de çalışır:** hem cevapta `"Playing"` yazar, hem de gelen JSON'da `"status": "Playing"` yazıldığında onu enum'a çevirir.
+
+**Kod değişince API'yi yeniden başlatmak gerekir.**
