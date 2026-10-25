@@ -346,3 +346,35 @@ builder.Services.AddControllers()
 **Bu ayar iki yönde de çalışır:** hem cevapta `"Playing"` yazar, hem de gelen JSON'da `"status": "Playing"` yazıldığında onu enum'a çevirir.
 
 **Kod değişince API'yi yeniden başlatmak gerekir.**
+
+---
+
+## Gün 14: İlk POST uç noktası
+
+**GET ve POST farkı:**
+- GET: "bana veri ver". İstekle veri gitmez.
+- POST: "sana veri gönderiyorum, kaydet". İstekle birlikte bir gövde (body) gider, içinde JSON vardır.
+
+**Parametreyle gelen veri:** `Post(Game game)` metodunda gelen JSON, ASP.NET tarafından otomatik olarak `Game` nesnesine çevrilip parametre olarak verilir (deserialization). Flask'ta `request.get_json()` ile elle yapardım.
+
+```csharp
+[HttpPost]
+public Game Post(Game game)
+{
+    game.Id = games.Max(g => g.Id) + 1;
+    games.Add(game);
+    return game;
+}
+```
+
+**Id'yi sunucu belirler:** İstemci `"id": 999` gönderse bile üzerine yazarım. Id'yi istemciye bırakırsam iki kayıt aynı numarayı alabilir.
+
+**`Max`:** Listedeki en büyük değeri bulur (`Average`'ın kardeşi, aynı LINQ ailesi). `Max + 1` ile yeni Id üretildi.
+
+**`private static` liste:** ASP.NET her istek için controller'ın yeni bir kopyasını üretip atar. Normal bir alan her istekte sıfırlanırdı. `static` alan tek kopya olarak bütün isteklerde paylaşılır.
+
+**Scalar'da POST denemek:** Uç noktayı seç, Body → JSON, veriyi yaz, Send. Cevapta Id doldurulmuş kaydı görürüm.
+
+**Enum ve JSON:** `"status": "Planned"` gibi metin olarak gönderebiliyorum (Gün 13'teki çevirmen sayesinde). Listede olmayan bir ad gönderirsem ASP.NET isteği 4xx koduyla reddeder, ben hiçbir kontrol yazmadım.
+
+**Bellekteki liste geçicidir:** Program kapanınca (`Ctrl+C`) eklenen oyunlar silinir. Kalıcı olması için veritabanı gerekiyor, sıradaki aşama bu.

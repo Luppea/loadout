@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using LoadoutApi.Models;
+using System.Linq;
 
 namespace LoadoutApi.Controllers;
 
@@ -9,11 +10,8 @@ namespace LoadoutApi.Controllers;
 
 public class GamesController : ControllerBase
 {
-    [HttpGet]
-    public List<Game> Get()
+    private static List<Game> games = new List<Game>
     {
-        return new List<Game>
-        {
             new Game
             {
                 Id = 1,
@@ -35,8 +33,20 @@ public class GamesController : ControllerBase
                 Status = Status.PlanToPlay
             }
 
-        };
+    };
 
+    [HttpGet]
+    public List<Game> Get()
+    {
+        return games;
+    }
+
+    [HttpPost]
+    public Game Post(Game game)
+    {
+        game.Id = games.Max(g => g.Id) + 1;
+        games.Add(game);
+        return game;
     }
 
 }
